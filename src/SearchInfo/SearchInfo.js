@@ -1,14 +1,15 @@
 import React from "react";
 import "./SearchInfo.css";
-// import Populate from "./Populate/Populate.js";
+import Populate from "../Populate/Populate.js";
 
 class SearchInfo extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      printType: "all",
-      bookType: "",
       q: "",
+      bookType: "",
+      printType: "all",
+      info: {},
     };
   }
   printTypeChange(printType) {
@@ -21,24 +22,32 @@ class SearchInfo extends React.Component {
       bookType,
     });
   }
-  newKeyword(searchKeyword) {
+  newKeyword(q) {
     this.setState({
-      searchKeyword,
+      q,
     });
   }
 
   handleSubmit(e) {
     e.preventDefault();
     console.log("Submit Clicked");
-    const params = Object.keys(state)
-      .map((item) => item + "=" + state[item])
+    const params = Object.keys(this.state)
+      .map((item) => item + "=" + this.state[item])
       .join("&");
+    console.log(params);
 
-    const url = `https://www.googleapis.com/books/v1/volumes?`;
+    const url = `https://www.googleapis.com/books/v1/volumes?` + params;
 
     fetch(url)
       .then((data) => data.json())
-      .then((data) => console.log(data));
+      .then((data) => this.handleInformation(data));
+  }
+
+  handleInformation(data) {
+    console.log(data);
+    this.setState({
+      info: data.items,
+    });
   }
 
   render() {
@@ -61,7 +70,7 @@ class SearchInfo extends React.Component {
             type="submit"
             value="Submit"
             className="formItem"
-            onClick={this.handleSubmit}
+            onClick={this.handleSubmit.bind(this)}
           />
         </form>
         {/*----Second Form----*/}
@@ -96,6 +105,7 @@ class SearchInfo extends React.Component {
             <option value="partial">Partially availalbe</option>
           </select>
         </form>
+        <Populate info={this.state.info} />
       </div>
     );
   }
